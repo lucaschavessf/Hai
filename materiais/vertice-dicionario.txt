@@ -1,0 +1,6 @@
+﻿id: identificador único. Linhas idênticas com mesmo ID são duplicatas.
+primeira_resposta_horas: horas úteis até a primeira resposta. Vazio é dado não registrado.
+Meta: até 4 horas inclusive. Atraso: maior que 4.
+Média: soma dos tempos válidos / número de chamados válidos.
+Percentual fora da meta: chamados acima de 4 horas / chamados com tempo válido x 100.
+Recurso: duas horas de especialista para orientação, triagem ou treinamento.

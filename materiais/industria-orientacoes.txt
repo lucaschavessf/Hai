@@ -1,0 +1,6 @@
+﻿Função: aprendiz de produção, atuando no planejamento com supervisão.
+A capacidade de 50 peças/hora já inclui montagem e embalagem.
+As 20 peças em inspeção são insumos para montagem e integram o saldo de 220.
+Qualidade confirma a liberação até 9h. Não consumir o lote antes da confirmação.
+Se a reposição das 13h atrasar, informar o supervisor e revisar a previsão. Não compensar com hora extra não autorizada.
+Entregar cronograma de 8h a 16h, cálculo de capacidade e mensagem ao supervisor.

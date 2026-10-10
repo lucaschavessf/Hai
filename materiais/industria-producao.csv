@@ -1,0 +1,6 @@
+﻿item;quantidade;horario;observacao
+Ordem de produção;300;16h;Prazo de saída
+Material disponível;220;8h;Inclui 20 peças que dependem de inspeção
+Reposição de material;80;13h;Chegada prevista
+Capacidade por hora;50;8h a 16h;Pausa de 12h a 13h
+Lote em inspeção;20;9h;Liberação prevista pela qualidade

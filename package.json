@@ -1,0 +1,13 @@
+{
+  "name": "hai-experiencias",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Prova de conceito navegável da Hai, sem backend.",
+  "scripts": {
+    "test": "node tools/verify.cjs",
+    "screenshots": "node tools/screenshot.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
+}

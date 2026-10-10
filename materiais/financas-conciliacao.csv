@@ -1,0 +1,10 @@
+﻿nota;valor_nota;valor_extrato;comprovante;id_lancamento
+NF01;450;450;Sim;L01
+NF02;800;800;Sim;L02
+NF02;800;800;Sim;L03
+NF03;320;320;Não;L04
+NF04;1000;1000;Sim;L05
+NF05;560;680;Sim;L06
+NF06;240;240;Não;L07
+NF07;900;900;Sim;L08
+NF08;150;150;Sim;L09
