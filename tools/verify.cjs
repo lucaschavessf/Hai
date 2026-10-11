@@ -24,7 +24,7 @@ const vm = require('node:vm');
     await page.reload();
 
     // All routes at phone, tablet and desktop widths, including narrow phones.
-    const routes = ['inicio','acesso','explorar','portfolio','empresa','avaliacao/maria','avaliacao/joao','avaliacao/ana','criar',
+    const routes = ['inicio','acesso','explorar','portfolio','sobre','privacidade','ajuda','empresa','avaliacao/maria','avaliacao/joao','avaliacao/ana','criar',
       ...['operacoes','marketing','dados','atendimento'].flatMap(id => [`experiencia/${id}`,`desafio/${id}`])];
     let layoutChecks = 0;
     for (const width of [320,390,768,1024,1440]) {
@@ -52,6 +52,8 @@ const vm = require('node:vm');
         assert.equal(result.h1, 1, `Heading ${route}`);
         assert.deepEqual(result.unlabeled, [], `Unlabeled inputs ${route}`);
         assert(!/protótipo|demonstração|✦|👋/i.test(result.text), `Unexpected UI copy ${route}`);
+        assert(!result.text.includes('·'), `Middle-dot separator in ${route}`);
+        assert(!/O próximo passo é seu|No seu ritmo|Da curiosidade à prática/.test(result.text), `Decorative microcopy in ${route}`);
         const isCompany = /^(empresa|avaliacao|criar)/.test(route);
         const nav = await page.locator('header nav').count() ? await page.locator('header nav').innerText() : '';
         if(isCompany) assert(!nav.includes('Meu portfólio'), 'Mixed employer navigation');
@@ -130,13 +132,13 @@ const vm = require('node:vm');
     await go('portfolio');
     assert.equal(await page.locator('.portfolio-entry').count(),4);
     await page.getByRole('button',{name:'Ver prévia pública'}).click();
-    assert(!(await page.locator('dialog').innerText()).includes(answers.operacoes));
+    assert(!(await page.locator('dialog').textContent()).includes(answers.operacoes));
     assert(!(await page.locator('dialog').innerText()).includes('Recife, PE'));
     await page.keyboard.press('Escape');
     await page.locator('[data-share="operacoes"]').check();
     await page.locator('[data-visibility="city"]').check();
     await page.getByRole('button',{name:'Ver prévia pública'}).click();
-    assert((await page.locator('dialog').innerText()).includes(answers.operacoes));
+    assert((await page.locator('dialog').textContent()).includes(answers.operacoes));
     assert((await page.locator('dialog').innerText()).includes('Recife, PE'));
     // Native dialog traps keyboard focus and Escape closes it.
     for(let i=0;i<8;i++) await page.keyboard.press('Tab');
@@ -144,7 +146,7 @@ const vm = require('node:vm');
     await page.keyboard.press('Escape');
     await page.locator('[data-visibility="experiences"]').uncheck();
     await page.getByRole('button',{name:'Ver prévia pública'}).click();
-    assert(!(await page.locator('dialog').innerText()).includes(answers.operacoes));
+    assert(!(await page.locator('dialog').textContent()).includes(answers.operacoes));
     await page.keyboard.press('Escape');
     await page.getByRole('button',{name:'Editar perfil'}).click();
     await page.locator('#profile-name').fill('Luiza Oliveira');
@@ -198,6 +200,56 @@ const vm = require('node:vm');
     await page.reload();
     assert.equal(await page.locator('#draft-title').inputValue(),'Conciliação de pagamentos — turma de entrada');
     console.log('All six templates populated, reviewed and saved; briefing survives navigation and reload.');
+
+    // Footer routes preserve the current environment, and the portfolio design is persistent.
+    await go('empresa');
+    for (const route of ['sobre','privacidade','ajuda']) {
+      await page.locator(`footer a[href="#${route}"]`).click();
+      await page.waitForFunction(expected => document.querySelector('#screen').dataset.route === expected, route);
+      assert((await page.locator('header nav').innerText()).includes('Avaliações'));
+      assert.equal(await page.locator('footer a[href="#'+route+'"]').count(),1);
+    }
+    await page.locator('footer a[href="#portfolio"]').click();
+    await page.waitForFunction(() => document.querySelector('#screen').dataset.route === 'portfolio');
+    assert((await page.locator('header nav').innerText()).includes('Meu portfólio'));
+    await page.locator('footer a[href="#sobre"]').click();
+    await page.waitForFunction(() => document.querySelector('#screen').dataset.route === 'sobre');
+    assert((await page.locator('header nav').innerText()).includes('Meu portfólio'));
+    await go('portfolio');
+    for (const layout of ['editorial','studio','classic']) {
+      await page.locator(`[data-appearance="layout"][data-value="${layout}"]`).click();
+      assert(await page.locator(`#portfolio-live .pf-${layout}`).count());
+      await page.getByRole('button',{name:'Ampliar'}).click();
+      assert.equal(await page.locator('dialog .public-portfolio').getAttribute('class'),await page.locator('#portfolio-live .public-portfolio').getAttribute('class'));
+      assert.equal(await page.locator('dialog .public-portfolio').innerHTML(),await page.locator('#portfolio-live .public-portfolio').innerHTML());
+      await page.keyboard.press('Escape');
+    }
+    await page.locator('[data-appearance="font"][data-value="serif"]').click();
+    await page.locator('[data-appearance="cover"][data-value="lines"]').click();
+    await page.locator('[data-appearance="color"][data-value="#ad563e"]').click();
+    await page.locator('#portfolio-color').fill('#334455');
+    assert.match(await page.locator('#portfolio-live .public-portfolio').getAttribute('style'),/#334455/);
+    await page.locator('[data-portfolio-device="mobile"]').click();
+    assert.match(await page.locator('#portfolio-live').getAttribute('class'),/mobile/);
+    await page.reload();
+    assert(await page.locator('#portfolio-live .pf-classic.pf-font-serif.pf-cover-lines').count());
+    assert.match(await page.locator('#portfolio-live .public-portfolio').getAttribute('style'),/#334455/);
+    await page.locator('[data-design-reset]').click();
+    assert(await page.locator('#portfolio-live .pf-editorial.pf-font-sans.pf-cover-soft').count());
+    for (const key of ['formation','projects','skills','city','institution','experiences']) {
+      await page.locator(`[data-visibility="${key}"]`).uncheck();
+    }
+    const privatePreview = await page.locator('#portfolio-live').textContent();
+    for (const hidden of ['Administração em formação','Organização de uma feira estudantil','Comunicação','Recife, PE','Escola Modelo',answers.operacoes]) {
+      assert(!privatePreview.includes(hidden), `Hidden content leaked in live preview: ${hidden}`);
+    }
+    await page.getByRole('button',{name:'Ampliar'}).click();
+    const privateDialog = await page.locator('dialog .public-portfolio').textContent();
+    for (const hidden of ['Administração em formação','Organização de uma feira estudantil','Comunicação','Recife, PE','Escola Modelo',answers.operacoes]) {
+      assert(!privateDialog.includes(hidden), `Hidden content leaked in expanded preview: ${hidden}`);
+    }
+    await page.keyboard.press('Escape');
+    console.log('Footer routes, environment continuity, three portfolio layouts, expanded preview, styling and reload persistence verified.');
     assert.deepEqual(errors,[],'Browser runtime errors');
     fs.writeFileSync('tmp/qa/results.json',JSON.stringify({layoutChecks,materialChecks,errors,passed:true},null,2));
     console.log('PASS — no browser runtime errors.');
