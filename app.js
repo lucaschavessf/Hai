@@ -9,6 +9,7 @@ const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({
 const initial = {
   deliveries: {},
   evaluations: {},
+  companyProfile: {},
   appearance: { ...defaultAppearance },
   project: { ...initialProject },
   profile: {
@@ -48,6 +49,7 @@ const state = {
       ? { title: saved.profile.project, where: '', role: '', process: saved.profile.projectDescription || '', result: '' }
       : { ...initial.project },
   appearance: { ...defaultAppearance, ...saved.appearance },
+  companyProfile: { ...saved.companyProfile },
   visibility: {
     ...initial.visibility,
     ...saved.visibility
@@ -59,7 +61,7 @@ const state = {
   candidate: 'maria',
   queue: 'Todas',
   template: 'operacoes',
-  audience: 'jovem'
+  audience: (sessionStorage.getItem('hai-audience') || saved.audience) === 'empresa' ? 'empresa' : 'jovem'
 };
 delete state.profile.project;
 delete state.profile.projectDescription;
@@ -69,6 +71,8 @@ function persist() {
     sessionStorage.setItem('hai-v2', JSON.stringify({
       deliveries: state.deliveries,
       evaluations: state.evaluations,
+      companyProfile: state.companyProfile,
+      audience: state.audience,
       profile: state.profile,
       project: state.project,
       appearance: state.appearance,
@@ -95,8 +99,8 @@ function criteria(x) {
   return x.criteria.map((c, i) => `<div class="criterion"><span>0${i + 1}</span><div><strong>${esc(c[0])}</strong><p>${esc(c[1])}</p></div></div>`).join('');
 }
 function header() {
-  const items = rh() ? [['empresa', 'Visão geral'], ['avaliacao', 'Avaliações'], ['criar', 'Criar experiência']] : [['inicio', 'Início'], ['explorar', 'Explorar'], ['portfolio', 'Meu portfólio']];
-  $('#header').innerHTML = `<div class="header-inner"><a href="#${rh() ? 'empresa' : 'inicio'}" aria-label="Hai, início" class="brand"><img src="Hai_Logo_Vetorizada.svg" alt="Hai"></a>${state.page === 'acesso' ? '' : `<nav aria-label="Navegação ${rh() ? 'da empresa' : 'do jovem'}">${items.map(([p, l]) => `<a href="#${p}" ${state.page === p || p === 'explorar' && ['experiencia', 'desafio'].includes(state.page) ? 'aria-current="page"' : ''}>${l}</a>`).join('')}</nav><div class="account"><a class="environment" href="#acesso">${rh() ? 'Ambiente da empresa' : 'Para empresas'} <span aria-hidden="true">↗</span></a><a class="avatar" href="#${rh() ? 'empresa' : 'portfolio'}" aria-label="${rh() ? 'Nexa, empresa' : esc(state.profile.name)}">${rh() ? 'N' : esc(state.profile.name.split(' ').map(x => x[0]).slice(0, 2).join(''))}</a></div>`}</div>`;
+  const items = rh() ? [['empresa', 'Visão geral'], ['perfil-empresa/Nexa', 'Perfil da empresa'], ['avaliacao', 'Avaliações'], ['criar', 'Criar experiência']] : [['inicio', 'Início'], ['explorar', 'Explorar'], ['portfolio', 'Meu portfólio']];
+  $('#header').innerHTML = `<div class="header-inner"><a href="#${rh() ? 'empresa' : 'inicio'}" aria-label="Hai, início" class="brand"><img src="Hai_Logo_Vetorizada.svg" alt="Hai"></a>${state.page === 'acesso' ? '' : `<nav aria-label="Navegação ${rh() ? 'da empresa' : 'do jovem'}">${items.map(([p, l]) => `<a href="#${p}" ${state.page === p.split('/')[0] && (!p.includes('/') || state.companyName === 'Nexa') || p === 'explorar' && ['experiencia', 'desafio'].includes(state.page) ? 'aria-current="page"' : ''}>${l}</a>`).join('')}</nav><div class="account"><a class="environment" href="#acesso">${rh() ? 'Ambiente da empresa' : 'Para empresas'} <span aria-hidden="true">↗</span></a><a class="avatar" href="#${rh() ? 'perfil-empresa/Nexa' : 'portfolio'}" aria-label="${rh() ? 'Nexa, empresa' : esc(state.profile.name)}">${rh() ? 'N' : esc(state.profile.name.split(' ').map(x => x[0]).slice(0, 2).join(''))}</a></div>`}</div>`;
 }
 const screens = {
   acesso() {
@@ -111,7 +115,7 @@ const screens = {
   },
   experiencia() {
     const x = exp();
-    return `<a class="back" href="#explorar">← Explorar experiências</a><section class="detail-hero"><div><p class="eyebrow">${x.brand} / ${x.area}</p><h1>${x.title}</h1><p class="lead">${x.short}</p><div class="detail-meta"><span>${x.time} minutos</span><span>${x.role}</span></div>${link(delivery(x.id).started ? 'Continuar experiência' : 'Começar experiência', `desafio/${x.id}`)}</div><img src="${x.image}" alt="${x.alt}"></section><div class="two-column"><div><section class="paper"><h2>Você faz parte da equipe.</h2><p>${x.about}</p><p>${x.scenario}</p></section><section class="paper"><h2>O que você vai entregar</h2><ol class="tasks">${x.tasks.map(t => `<li>${t}</li>`).join('')}</ol></section><section class="paper"><h2>Materiais para se preparar</h2><p>Leia o contexto e consulte os dados durante o desafio.</p>${materials(x)}</section></div><aside><section class="paper mint"><h2>O que será observado</h2>${criteria(x)}<p class="small">Sua entrega será avaliada por uma pessoa da equipe da ${x.brand}.</p></section><section class="paper quiet"><h3>O trabalho é seu.</h3><p>Você escolhe quais experiências e entregas aparecem no seu portfólio.</p></section></aside></div>`;
+    return `<a class="back" href="#explorar">← Explorar experiências</a><section class="detail-hero"><div><p class="eyebrow">${x.brand} / ${x.area}</p><h1>${x.title}</h1><p class="lead">${x.short}</p><div class="detail-meta"><span>${x.time} minutos</span><span>${x.role}</span></div>${link(delivery(x.id).started ? 'Continuar experiência' : 'Começar experiência', `desafio/${x.id}`)}</div><img src="${x.image}" alt="${x.alt}"></section><div class="two-column"><div><section class="paper"><h2>Você faz parte da equipe.</h2><p>${x.about}</p><a class="company-inline-link" href="#perfil-empresa/${encodeURIComponent(x.brand)}">Conhecer a ${esc(x.brand)} <span aria-hidden="true">↗</span></a><p>${x.scenario}</p></section><section class="paper"><h2>O que você vai entregar</h2><ol class="tasks">${x.tasks.map(t => `<li>${t}</li>`).join('')}</ol></section><section class="paper"><h2>Materiais para se preparar</h2><p>Leia o contexto e consulte os dados durante o desafio.</p>${materials(x)}</section></div><aside><section class="paper mint"><h2>O que será observado</h2>${criteria(x)}<p class="small">Após enviar, você recebe uma análise automática estimada. A avaliação humana é separada.</p></section><section class="paper quiet"><h3>O trabalho é seu.</h3><p>Você escolhe quais experiências e entregas aparecem no seu portfólio.</p></section></aside></div>`;
   },
   desafio: challengeScreen,
   portfolio() {
@@ -126,7 +130,7 @@ const screens = {
   },
   empresa() {
     const done = Object.values(state.evaluations).filter(x => x.saved).length;
-    return `${head('NEXA / AMBIENTE DA EMPRESA', 'Potencial se conhece na prática.', 'Acompanhe as experiências e dedique atenção a cada entrega.', link('Criar experiência', 'criar'))}<div class="company-summary"><div><strong>184</strong><span>Participantes</span></div><div><strong>137</strong><span>Entregas recebidas</span></div><div><strong>${3 - done}</strong><span>Para avaliar</span></div><div><strong>${134 + done}</strong><span>Avaliações concluídas</span></div></div><div class="company-columns"><section class="paper"><div class="section-title"><h2>Experiência em andamento</h2><span class="status">Publicada</span></div><div class="company-experience"><img src="assets/operacoes.jpg" alt="Centro de distribuição"><div><p class="card-meta">Administração<span class="meta-duration">${experiences[0].time} min</span></p><h3>${experiences[0].title}</h3><p>Programa de entrada para assistente de operações</p></div></div><div class="funnel"><div><span>Iniciaram</span><meter min="0" max="184" value="184">184</meter><strong>184</strong></div><div><span>Entregaram</span><meter min="0" max="184" value="137">137</meter><strong>137</strong></div><div><span>Avaliados</span><meter min="0" max="184" value="${134 + done}">${134 + done}</meter><strong>${134 + done}</strong></div></div><p class="small">74% dos participantes concluíram a experiência.</p></section><section class="paper mint"><h2>Próximas avaliações</h2>${candidates.filter(c => !state.evaluations[c.id]?.saved).map(c => `<a class="candidate-row" href="#avaliacao/${c.id}"><span class="avatar">${c.name.split(' ').map(w => w[0]).join('')}</span><div><strong>${c.name}</strong><small>${c.city}</small></div><span>↗</span></a>`).join('') || '<p>As três entregas da fila foram avaliadas.</p>'}${link('Abrir avaliações', 'avaliacao', 'secondary')}</section></div><section class="paper"><div class="section-title"><h2>Participantes</h2><label class="inline-label">Status<select id="queue-filter">${['Todas', 'Pendentes', 'Avaliadas'].map(x => `<option ${state.queue === x ? 'selected' : ''}>${x}</option>`).join('')}</select></label></div><div id="candidate-list">${candidateTable()}</div></section>${state.draft ? `<section class="paper"><p class="eyebrow">RASCUNHO DE EXPERIÊNCIA</p><div class="section-title"><div><h2>${esc(state.draft.title)}</h2><p>${esc(state.draft.sector)}<span class="meta-duration">${esc(state.draft.role)}</span></p></div>${link('Continuar edição', 'criar', 'secondary')}</div></section>` : ''}`;
+    return `${head('NEXA / AMBIENTE DA EMPRESA', 'Potencial se conhece na prática.', 'Acompanhe as experiências e dedique atenção a cada entrega.', link('Criar experiência', 'criar'))}<div class="company-summary"><div><strong>184</strong><span>Participantes</span></div><div><strong>137</strong><span>Entregas recebidas</span></div><div><strong>${3 - done}</strong><span>Para avaliar</span></div><div><strong>${134 + done}</strong><span>Avaliações concluídas</span></div></div><div class="company-columns"><section class="paper"><div class="section-title"><h2>Experiência em andamento</h2><span class="status">Publicada</span></div><div class="company-experience"><img src="assets/operacoes.jpg" alt="Centro de distribuição"><div><p class="card-meta">Administração<span class="meta-duration">${experiences[0].time} min</span></p><h3>${experiences[0].title}</h3><p>Programa de entrada para assistente de operações</p></div></div><a class="company-inline-link company-dashboard-link" href="#perfil-empresa/Nexa">Ver perfil público e desafios abertos <span aria-hidden="true">↗</span></a><div class="funnel"><div><span>Iniciaram</span><meter min="0" max="184" value="184">184</meter><strong>184</strong></div><div><span>Entregaram</span><meter min="0" max="184" value="137">137</meter><strong>137</strong></div><div><span>Avaliados</span><meter min="0" max="184" value="${134 + done}">${134 + done}</meter><strong>${134 + done}</strong></div></div><p class="small">74% dos participantes concluíram a experiência.</p></section><section class="paper mint"><h2>Próximas avaliações</h2>${candidates.filter(c => !state.evaluations[c.id]?.saved).map(c => `<a class="candidate-row" href="#avaliacao/${c.id}"><span class="avatar">${c.name.split(' ').map(w => w[0]).join('')}</span><div><strong>${c.name}</strong><small>${c.city}</small></div><span>↗</span></a>`).join('') || '<p>As três entregas da fila foram avaliadas.</p>'}${link('Abrir avaliações', 'avaliacao', 'secondary')}</section></div><section class="paper"><div class="section-title"><h2>Participantes</h2><label class="inline-label">Status<select id="queue-filter">${['Todas', 'Pendentes', 'Avaliadas'].map(x => `<option ${state.queue === x ? 'selected' : ''}>${x}</option>`).join('')}</select></label></div><div id="candidate-list">${candidateTable()}</div></section>${state.draft ? `<section class="paper"><p class="eyebrow">RASCUNHO DE EXPERIÊNCIA</p><div class="section-title"><div><h2>${esc(state.draft.title)}</h2><p>${esc(state.draft.sector)}<span class="meta-duration">${esc(state.draft.role)}</span></p></div>${link('Continuar edição', 'criar', 'secondary')}</div></section>` : ''}`;
   },
   avaliacao() {
     const c = candidates.find(x => x.id === state.candidate) || candidates[0],
@@ -136,7 +140,8 @@ const screens = {
       };
     return `<a class="back" href="#empresa">← Visão geral</a>${head('AVALIAÇÃO HUMANA', 'Uma entrega. Um olhar atento.', 'Avalie as decisões com os mesmos critérios apresentados no desafio.')}<div class="candidate-tabs" aria-label="Selecionar participante">${candidates.map(x => `<a href="#avaliacao/${x.id}" ${c.id === x.id ? 'aria-current="page"' : ''}>${x.name}${state.evaluations[x.id]?.saved ? ' (avaliada)' : ''}</a>`).join('')}</div><div class="two-column"><div><section class="paper"><div class="section-title"><div><p class="eyebrow">${experiences[0].title}</p><h2>${c.name}</h2><p>${c.city}</p></div><span class="status">${v.saved ? 'Avaliada' : 'Aguardando avaliação'}</span></div><h3>Resposta da pessoa participante</h3><div class="answer-text rich-text">${markdownHtml(c.answer)}</div></section><section class="paper"><h2>Contexto do desafio</h2><p>${experiences[0].scenario}</p>${materials(experiences[0])}<details><summary>Referência para a avaliação</summary><p>Uma resposta consistente consulta o estoque até 14h40, informa a clínica sem prometer o que não está liberado e leva a autorização de frete à supervisora às 15h. A decisão considera o aceite da clínica e a coleta às 15h30. Outras sequências são válidas se justificadas.</p></details></section><section class="paper quiet company-project"><p class="eyebrow">TRAJETÓRIA COMPLEMENTAR</p><h3>Projeto compartilhado</h3>${projectDetails(c.project)}</section></div><aside><form class="paper" id="evaluation-form"><h2>Sua avaliação</h2><p>0: não apresentado. 1 a 2: parcial. 3: atende. 4 a 5: atende com clareza e justificativa.</p>${experiences[0].criteria.map((r, i) => `<div class="score-row"><label for="score-${i}">${r[0]} <output id="score-value-${i}">${v.scores[i]}/5</output></label><p>${r[1]}</p><input id="score-${i}" data-score="${i}" type="range" min="0" max="5" value="${v.scores[i]}"></div>`).join('')}<div class="score-total">Pontuação <strong id="score-total">${v.scores.reduce((a, b) => a + b, 0)}/15</strong></div>${markdownEditor('feedback',`Devolutiva para ${c.name.split(' ')[0]}`,v.feedback,5,true)}<p class="small">Ao menos 20 caracteres. A nota apoia a leitura da entrega; a decisão permanece com a equipe.</p><button class="btn primary full" type="submit">${v.saved ? 'Atualizar avaliação' : 'Salvar avaliação'}</button></form></aside></div>`;
   },
-  criar: createScreen
+  criar: createScreen,
+  'perfil-empresa': companyProfileScreen
 };
 Object.assign(screens, institutionalScreens);
 
@@ -237,6 +242,7 @@ function render() {
     desafio: exp().title,
     portfolio: 'Meu portfólio',
     empresa: 'Ambiente da empresa',
+    'perfil-empresa': state.companyName,
     avaliacao: 'Avaliações',
     criar: 'Criar experiência',
     acesso: 'Escolha seu ambiente',
@@ -266,6 +272,7 @@ function route() {
   state.page = screens[page] ? page : 'inicio';
   if (['empresa', 'avaliacao', 'criar'].includes(state.page)) state.audience = 'empresa';
   if (['inicio', 'explorar', 'experiencia', 'desafio', 'portfolio'].includes(state.page)) state.audience = 'jovem';
+  if (state.page === 'perfil-empresa') state.companyName = companyProfiles[decodeURIComponent(id || '')] ? decodeURIComponent(id) : 'Nexa';
   if (['experiencia', 'desafio'].includes(state.page)) {
     state.id = (state.page === 'desafio' && id === 'criado' && state.draft) || experiences.some(x => x.id === id) ? id : 'operacoes';
     if (state.page === 'desafio') {
@@ -279,6 +286,7 @@ function route() {
   }
   if (state.page === 'avaliacao') state.candidate = candidates.some(c => c.id === id) ? id : 'maria';
   if (state.page === 'criar' && state.draft?.id) state.template = state.draft.id;
+  try { sessionStorage.setItem('hai-audience', state.audience); } catch (e) {}
   render();
   $('#screen').focus({
     preventScroll: true
@@ -346,6 +354,15 @@ document.addEventListener('click', e => {
       saveResponse();
       $('#save-status').textContent = 'Rascunho salvo';
       toast('Rascunho salvo.');
+      break;
+    case 'refresh-feedback':
+      state.deliveries[state.id].estimatedFeedback = estimateFeedback(exp(), delivery(state.id));
+      persist();
+      render();
+      break;
+    case 'edit-company-profile':
+      modal('Editar perfil da Nexa', companyProfileForm());
+      $('#company-tagline').focus();
       break;
     case 'add-question': {
       const snapshot = readBrief();
@@ -489,7 +506,7 @@ document.addEventListener('change', e => {
   }
 });
 document.addEventListener('submit', e => {
-  if (!['delivery-form', 'evaluation-form', 'profile-form', 'project-form', 'briefing-form'].includes(e.target.id)) return;
+  if (!['delivery-form', 'evaluation-form', 'profile-form', 'company-profile-form', 'project-form', 'briefing-form'].includes(e.target.id)) return;
   e.preventDefault();
   if (e.target.id === 'delivery-form') {
     saveResponse();
@@ -506,6 +523,7 @@ document.addEventListener('submit', e => {
       return;
     }
     d.submitted = true;
+    d.estimatedFeedback = estimateFeedback(exp(), d);
     persist();
     render();
     toast('Entrega enviada para avaliação.');
@@ -533,6 +551,18 @@ document.addEventListener('submit', e => {
     $('#dialog').close();
     render();
     toast('Perfil atualizado.');
+  }
+  if (e.target.id === 'company-profile-form') {
+    const values = Object.fromEntries([...new FormData(e.target)].map(([key, value]) => [key, value.trim()]));
+    if (Object.values(values).some(value => !value) || !values.values.split(',').some(value => value.trim())) {
+      toast('Preencha os campos do perfil da empresa.');
+      return;
+    }
+    state.companyProfile = values;
+    persist();
+    $('#dialog').close();
+    render();
+    toast('Perfil da empresa atualizado.');
   }
   if (e.target.id === 'project-form') {
     const project = Object.fromEntries([...new FormData(e.target)].map(([key, value]) => [key, value.trim()]));

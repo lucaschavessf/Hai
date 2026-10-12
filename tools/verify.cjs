@@ -24,7 +24,7 @@ const vm = require('node:vm');
     await page.reload();
 
     // All routes at phone, tablet and desktop widths, including narrow phones.
-    const routes = ['inicio','acesso','explorar','portfolio','sobre','privacidade','ajuda','empresa','avaliacao/maria','avaliacao/joao','avaliacao/ana','criar',
+    const routes = ['inicio','acesso','explorar','portfolio','perfil-empresa/Nexa','perfil-empresa/Lumina','perfil-empresa/V%C3%A9rtice','perfil-empresa/Ponto','sobre','privacidade','ajuda','empresa','avaliacao/maria','avaliacao/joao','avaliacao/ana','criar',
       ...['operacoes','marketing','dados','atendimento'].flatMap(id => [`experiencia/${id}`,`desafio/${id}`])];
     let layoutChecks = 0;
     for (const width of [320,390,768,1024,1440]) {
