@@ -4,7 +4,7 @@
   "private": true,
   "description": "Prova de conceito navegável da Hai, sem backend.",
   "scripts": {
-    "test": "node tools/verify.cjs",
+    "test": "node tools/verify.cjs && node tools/verify-features.cjs",
     "screenshots": "node tools/screenshot.cjs"
   },
   "devDependencies": {

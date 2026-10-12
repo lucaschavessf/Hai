@@ -29,6 +29,8 @@ const experiences = [{
   }]
 }, {
   id: 'marketing',
+  timeLimitMinutes: 90,
+  formQuestions: [{ id: 'channel', label: 'Qual canal você priorizaria para o lançamento?', type: 'select', required: false, options: ['Instagram local', 'Criador local', 'Panfletagem nas faculdades'] }],
   brand: 'Lumina',
   area: 'Marketing',
   sector: 'Varejo e consumo',
@@ -157,19 +159,19 @@ const candidates = [{
   name: 'Maria Santos',
   city: 'Recife, PE',
   answer: 'Às 14h pediria a Carlos a confirmação dos 30 kits até 14h40. Enviaria à colega o caminho do procedimento e avisaria a clínica sobre a conferência. Sem liberação às 14h40, consultaria a clínica sobre receber 90 hoje e levaria a Renata às 15h a aprovação do frete adicional. Fecharia a expedição até 15h15. Conferiria o relatório após a coleta.\n\nMariana, temos 90 kits liberados e 30 em conferência. Vou atualizar você até 14h45 para alinharmos a entrega. Se necessário, podemos conversar sobre um envio parcial.',
-  project: 'Organização de uma feira estudantil'
+  project: { title: 'Organização de uma feira estudantil', where: 'Escola', role: 'Planejamento e comunicação', process: 'Dividi tarefas com colegas, preparei um cronograma e acompanhei as atividades até o evento.', result: 'Aprendi a ajustar o planejamento quando surgiram imprevistos.' }
 }, {
   id: 'joao',
   name: 'João Pedro',
   city: 'Olinda, PE',
   answer: 'Aguardaria o estoque até 14h40 e conferiria o relatório nesse intervalo. Às 15h pediria autorização de frete extra, se necessário. Avisaria a clínica antes da coleta sobre a quantidade disponível.\n\nMariana, estamos verificando 30 kits e temos 90 disponíveis. Retorno às 15h. Se não houver liberação, podemos combinar uma entrega parcial?',
-  project: 'Controle de materiais do grêmio'
+  project: { title: 'Controle de materiais do grêmio', where: 'Grêmio estudantil', role: 'Registro de materiais', process: 'Organizei uma planilha de entradas e saídas e estabeleci uma conferência periódica com a equipe.', result: 'O grupo passou a consultar um registro único dos materiais.' }
 }, {
   id: 'ana',
   name: 'Ana Clara',
   city: 'Jaboatão, PE',
   answer: 'Consultaria a clínica sobre receber 90 kits. Pediria a posição dos outros 30 até 14h40. Enviaria o procedimento à colega e registraria as divergências para revisar após a coleta. Levaria a decisão do frete à supervisora às 15h.\n\nMariana, acompanho seu pedido. Temos 90 kits liberados e aguardamos a conferência de 30 até 14h40. Retorno até 14h50. Você conseguiria receber 90 hoje se o restante ainda estivesse em conferência?',
-  project: 'Campanha de arrecadação'
+  project: { title: 'Campanha de arrecadação', where: 'Comunidade local', role: 'Comunicação e organização', process: 'Ajudei a divulgar a campanha, combinei pontos de coleta e organizei a triagem das doações.', result: 'Aprendi a comunicar prazos e responsabilidades com clareza.' }
 }];
 
 // The same source drives the participant brief and the employer's template.

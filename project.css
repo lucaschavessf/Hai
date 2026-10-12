@@ -1,0 +1,41 @@
+.project-management { margin-top:20px; }
+.project-management .section-title { align-items:flex-start; margin-bottom:20px; }
+.project-management .eyebrow { margin:0 0 8px; }
+.project-management h2 { margin:0; }
+.project-count { flex:none; border:1px solid var(--line); border-radius:20px; padding:7px 11px; color:var(--muted); font-size:11px; }
+.project-management>.small { margin:18px 0 0; }
+.project-details h3 { margin:0 0 16px; font-size:20px; line-height:1.25; }
+.project-facts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-bottom:17px; }
+.project-facts>div { padding:12px 14px; border:1px solid var(--line); border-radius:7px; background:#fafcfb; min-width:0; }
+.project-facts span,.project-story span { display:block; color:var(--muted); font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; margin-bottom:6px; }
+.project-facts strong { display:block; font-size:12px; line-height:1.45; overflow-wrap:anywhere; }
+.project-story { margin-top:15px; }
+.project-story p { margin:0; font-size:13px; line-height:1.65; overflow-wrap:anywhere; white-space:pre-wrap; }
+.project-actions { display:flex; align-items:center; gap:18px; flex-wrap:wrap; margin-top:22px; border-top:1px solid var(--line); padding-top:20px; }
+.project-actions .btn { min-height:40px; padding:9px 15px; font-size:12px; }
+.project-actions .text-button { font-size:12px; }
+.project-form>p { margin:0 0 20px; }
+.project-form>label { display:block; margin:17px 0 8px; }
+.project-form input,.project-form textarea { width:100%; }
+.project-form .form-actions { margin-top:24px; }
+.company-project { border-left:3px solid var(--teal); }
+.company-project .eyebrow { margin:0 0 7px; }
+.company-project>h3 { margin:0 0 20px; }
+.company-project .project-details h3 { font-size:18px; }
+.company-project .project-facts>div { background:#fff; }
+.public-portfolio .pf-project { background:#fafcfb; border:1px solid #e4e9e5; border-radius:5px; padding:22px 24px; }
+.public-portfolio .pf-project .project-details h3 { font-size:21px; margin:0 0 14px; }
+.public-portfolio .pf-project .project-facts { gap:8px; margin-bottom:12px; }
+.public-portfolio .pf-project .project-facts>div { background:white; border-color:#e4e9e5; padding:9px 11px; }
+.public-portfolio .pf-project .project-facts span,.public-portfolio .pf-project .project-story span { font-size:9px; }
+.public-portfolio .pf-project .project-facts strong { font-size:11px; color:var(--pf-dark); }
+.public-portfolio .pf-project .project-story { margin-top:12px; }
+.public-portfolio .pf-project .project-story p { font-size:11px; }
+.pf-studio .pf-project { border-left:3px solid var(--pf-color); }
+@container (max-width:560px) {
+  .public-portfolio .pf-project .project-facts { grid-template-columns:1fr; }
+}
+@media(max-width:600px) {
+  .project-management .section-title { gap:10px; }
+  .project-facts { grid-template-columns:1fr; }
+}
