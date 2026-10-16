@@ -19,9 +19,16 @@ const vm = require('node:vm');
       await page.waitForFunction(expected => document.querySelector('#screen').dataset.route === expected, route);
       await page.locator('#screen h1').waitFor();
     };
+    const challengeStep = async step => {
+      await page.locator(`.workspace-steps [data-challenge-step="${step}"]`).click();
+      await page.locator(`[data-step-panel="${step}"]`).waitFor({state:'visible'});
+    };
     await go('inicio');
     await page.evaluate(() => sessionStorage.clear());
     await page.reload();
+    assert.equal(await page.locator('.hero h1').innerText(),'Conheça profissões\nresolvendo desafios.');
+    assert.equal(await page.locator('.hero .btn').getAttribute('href'),'#explorar');
+    assert.equal(await page.locator('.hero-note').count(),1);
 
     // All routes at phone, tablet and desktop widths, including narrow phones.
     const routes = ['inicio','acesso','explorar','portfolio','perfil-empresa/Nexa','perfil-empresa/Lumina','perfil-empresa/V%C3%A9rtice','perfil-empresa/Ponto','sobre','privacidade','ajuda','empresa','avaliacao/maria','avaliacao/joao','avaliacao/ana','criar',
@@ -51,6 +58,7 @@ const vm = require('node:vm');
         assert.equal(result.broken.length, 0, `Broken image ${route}`);
         assert.equal(result.h1, 1, `Heading ${route}`);
         assert.deepEqual(result.unlabeled, [], `Unlabeled inputs ${route}`);
+        assert(!result.text.includes('↗') && !result.text.includes('${uiIcons'), `Unresolved navigation icon in ${route}`);
         assert(!/protótipo|demonstração|✦|👋/i.test(result.text), `Unexpected UI copy ${route}`);
         assert(!result.text.includes('·'), `Middle-dot separator in ${route}`);
         assert(!/O próximo passo é seu|No seu ritmo|Da curiosidade à prática/.test(result.text), `Decorative microcopy in ${route}`);
@@ -66,11 +74,39 @@ const vm = require('node:vm');
     }
     console.log(`${layoutChecks} route/viewport checks: no overflow, broken images, unlabeled fields or mixed navigation.`);
 
+    // Mobile navigation leads through the challenge context and keeps key actions visible.
+    await page.setViewportSize({width:390,height:900});
+    await go('perfil-empresa/Nexa');
+    assert.equal(await page.locator('.company-profile-actions a').getAttribute('href'),'#experiencia/operacoes');
+    await go('experiencia/marketing');
+    assert.match(await page.locator('.detail-hero .btn').innerText(),/Conferir prazo de 90 min/);
+    await go('empresa');
+    const evaluationQueue = await page.evaluate(() => {
+      const queue = document.querySelector('.company-columns>.paper.mint').getBoundingClientRect();
+      const summary = document.querySelector('.company-columns>.paper:not(.mint)').getBoundingClientRect();
+      return {queue:queue.top,summary:summary.top};
+    });
+    assert(evaluationQueue.queue < evaluationQueue.summary,'Mobile evaluation queue should precede the experience summary');
+    await go('criar');
+    const briefingLayout = await page.evaluate(() => {
+      const action = document.querySelector('.briefing-actions');
+      const body = document.querySelector('.briefing-selection-note');
+      return {action:action.getBoundingClientRect().top,body:body.getBoundingClientRect().bottom};
+    });
+    assert(briefingLayout.action > briefingLayout.body,'First briefing action should follow its guidance');
+    await go('avaliacao/maria');
+    await page.getByRole('button',{name:'Ir para avaliação'}).click();
+    assert.equal(await page.evaluate(() => document.activeElement?.id),'evaluation-form');
+
     await page.setViewportSize({width:1440,height:1000});
     await go('explorar');
     await page.evaluate(() => sessionStorage.clear());
     await page.reload();
     assert.equal(await page.locator('.experience-card').count(),4);
+    const marketingCard = page.locator('.experience-card').filter({has:page.locator('h3 a[href="#experiencia/marketing"]')});
+    assert.match(await marketingCard.locator('.card-image').innerText(),/60 min estimados/);
+    assert.match(await marketingCard.locator('.card-deadline').innerText(),/Prazo para enviar: 90 min/);
+    assert.equal(await page.locator('.experience-card:not(:has(h3 a[href="#experiencia/marketing"])) .card-deadline').count(),0);
     await page.getByRole('button',{name:'Marketing',exact:true}).click();
     assert.equal(await page.locator('.experience-card').count(),1);
     await page.locator('#search').fill('inexistente');
@@ -78,9 +114,9 @@ const vm = require('node:vm');
     await page.getByRole('button',{name:'Limpar filtros'}).click();
     await page.locator('#search').fill('Vértice');
     assert.equal(await page.locator('.experience-card').count(),1);
-    await page.getByRole('link',{name:'Conhecer desafio'}).click();
+    await page.getByRole('link',{name:'Ver desafio'}).click();
     assert.match(page.url(),/experiencia\/dados$/);
-    assert.match(await page.locator('h1').innerText(),/atrasando/);
+    await page.getByRole('heading',{name:/atrasando/i}).waitFor();
 
     // Real material downloads, not placeholder controls.
     const source = {};
@@ -100,18 +136,48 @@ const vm = require('node:vm');
     const answers = {};
     for (const id of ['operacoes','marketing','dados','atendimento']) {
       await go(`desafio/${id}`);
+      if (await page.locator('[data-action="start-challenge"]').count()) await page.locator('[data-action="start-challenge"]').click();
+      if (id === 'operacoes') {
+        assert.equal(await page.locator('[data-step-panel="context"]').isVisible(), true);
+        assert.equal(await page.locator('[data-step-panel="solution"]').isVisible(), false);
+        assert.equal(await page.locator('[data-step-panel="delivery"]').isVisible(), false);
+        await go('inicio');
+        assert.equal(await page.locator('.hero .btn').getAttribute('href'),'#desafio/operacoes');
+        assert.match(await page.locator('.hero .btn').innerText(),/Continuar desafio/);
+        await go('explorar');
+        await page.locator('#search').fill('Nexa');
+        const activeCard = page.locator('.experience-card').filter({has:page.getByRole('heading',{name:'Uma entrega que não pode esperar'})});
+        assert.equal(await activeCard.locator('.card-link').innerText(),'Continuar desafio');
+        assert.equal(await activeCard.locator('.card-link').getAttribute('href'),'#desafio/operacoes');
+        assert.equal(await activeCard.locator('h3 a').getAttribute('href'),'#desafio/operacoes');
+        await activeCard.locator('.card-link').click();
+        assert.match(page.url(),/desafio\/operacoes$/);
+      }
+      await challengeStep('delivery');
       await page.getByRole('button',{name:'Enviar entrega',exact:true}).click();
       assert.match(await page.locator('#delivery-error').innerText(),/80 caracteres/);
       answers[id]=`Minha solução para ${id}: começo conferindo as informações do material, organizo as decisões conforme os prazos e explico os critérios usados para a equipe.`;
+      await challengeStep('solution');
       await page.locator('#response').fill(answers[id]);
+      await challengeStep('delivery');
       await page.getByRole('button',{name:'Enviar entrega',exact:true}).click();
       await page.locator('.success-banner').waitFor();
     }
     for(const id of Object.keys(answers)) {
       await go(`desafio/${id}`);
+      if (await page.locator('[data-action="start-challenge"]').count()) await page.locator('[data-action="start-challenge"]').click();
       assert.equal(await page.locator('#response').inputValue(),answers[id]);
       assert.equal(await page.locator('.success-banner').count(),1);
     }
+    await go('inicio');
+    assert.equal(await page.locator('.hero .btn').getAttribute('href'),'#explorar');
+    assert.match(await page.locator('.hero .btn').innerText(),/Explorar experiências/);
+    await go('explorar');
+    await page.locator('#search').fill('Nexa');
+    const submittedCard = page.locator('.experience-card').filter({has:page.getByRole('heading',{name:'Uma entrega que não pode esperar'})});
+    assert.equal(await submittedCard.locator('.card-link').innerText(),'Ver entrega');
+    assert.equal(await submittedCard.locator('.card-link').getAttribute('href'),'#desafio/operacoes');
+    await go('desafio/atendimento');
     await page.reload();
     assert.equal(await page.locator('#response').inputValue(),answers.atendimento);
     await page.locator('#attachment').setInputFiles({name:'not-allowed.exe',mimeType:'application/octet-stream',buffer:Buffer.from('bad')});
@@ -120,11 +186,15 @@ const vm = require('node:vm');
     assert.match(await page.locator('#delivery-error').innerText(),/até 10 MB/);
     await page.locator('#attachment').setInputFiles('materiais/ponto-historico.txt');
     assert.match(await page.locator('#file-status').innerText(),/ponto-historico/);
+    await challengeStep('solution');
     await page.locator('#response').fill('');
+    await challengeStep('delivery');
     await page.getByRole('button',{name:'Atualizar entrega'}).click();
     await page.locator('.success-banner').waitFor();
     await page.locator('[data-action="remove-file"]').click();
+    await challengeStep('solution');
     await page.locator('#response').fill(answers.atendimento);
+    await challengeStep('delivery');
     await page.getByRole('button',{name:'Atualizar entrega'}).click();
     console.log('All four deliveries: independent state, validation, submission, reload, file type/size and file-only submission verified.');
 
@@ -183,19 +253,28 @@ const vm = require('node:vm');
     assert.equal(await page.locator('.template-card').count(),6);
     for(const t of source.templates) {
       await page.locator(`[data-template="${t.id}"]`).click();
-      await page.getByRole('button',{name:'Usar template',exact:true}).click();
-      assert.equal(await page.locator('#draft-title').inputValue(),t.title);
-      assert((await page.locator('#draft-reference').inputValue()).length>100);
-      assert.equal(await page.locator('#template-materials .material').count(),2);
+      assert.equal(await page.locator('#dialog').isVisible(),false,'Pristine template selection should not need confirmation');
+      const draft = await page.evaluate(() => JSON.parse(sessionStorage.getItem('hai-v2')).draft);
+      assert.equal(draft.title,t.title);
+      assert(draft.reference.length>100);
+      assert.equal(draft.resources.length,2);
     }
+    await page.locator('[data-action="briefing-next"]').click();
     await page.locator('#draft-title').fill('Conciliação de pagamentos — turma de entrada');
-    await page.getByRole('button',{name:'Revisar experiência'}).click();
-    assert.match(await page.locator('dialog').innerText(),/Conciliação de pagamentos/);
-    await page.keyboard.press('Escape');
-    await page.getByRole('button',{name:'Salvar briefing',exact:true}).click();
+    await page.locator('[data-action="briefing-back"]').click();
+    await page.locator('[data-template="operacoes"]').click();
+    assert.equal(await page.locator('#dialog').isVisible(),true,'Replacing edited briefing should need confirmation');
+    await page.getByRole('button',{name:'Continuar editando'}).click();
+    await page.locator('[data-action="briefing-next"]').click();
+    assert.equal(await page.locator('#draft-title').inputValue(),'Conciliação de pagamentos — turma de entrada');
+    for (let i=0;i<3;i++) await page.locator('[data-action="briefing-next"]').click();
+    assert.match(await page.locator('.briefing-review').innerText(),/Conciliação de pagamentos/);
+    await page.getByRole('button',{name:'Salvar rascunho',exact:true}).click();
     await go('empresa');
     assert.match(await page.locator('#screen').innerText(),/Conciliação de pagamentos/);
     await page.getByRole('link',{name:'Continuar edição'}).click();
+    for (let i=0;i<4;i++) await page.locator('[data-action="briefing-back"]').click();
+    await page.locator('[data-action="briefing-next"]').click();
     assert.equal(await page.locator('#draft-title').inputValue(),'Conciliação de pagamentos — turma de entrada');
     await page.reload();
     assert.equal(await page.locator('#draft-title').inputValue(),'Conciliação de pagamentos — turma de entrada');
@@ -216,6 +295,7 @@ const vm = require('node:vm');
     await page.waitForFunction(() => document.querySelector('#screen').dataset.route === 'sobre');
     assert((await page.locator('header nav').innerText()).includes('Meu portfólio'));
     await go('portfolio');
+    await page.locator('.design-controls > summary').click();
     for (const layout of ['editorial','studio','classic']) {
       await page.locator(`[data-appearance="layout"][data-value="${layout}"]`).click();
       assert(await page.locator(`#portfolio-live .pf-${layout}`).count());
@@ -232,6 +312,7 @@ const vm = require('node:vm');
     await page.locator('[data-portfolio-device="mobile"]').click();
     assert.match(await page.locator('#portfolio-live').getAttribute('class'),/mobile/);
     await page.reload();
+    await page.locator('.design-controls > summary').click();
     assert(await page.locator('#portfolio-live .pf-classic.pf-font-serif.pf-cover-lines').count());
     assert.match(await page.locator('#portfolio-live .public-portfolio').getAttribute('style'),/#334455/);
     await page.locator('[data-design-reset]').click();

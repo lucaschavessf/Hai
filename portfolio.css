@@ -16,13 +16,13 @@
 .mini-studio i:first-child { grid-row:1 / span 2; background:#587d72; }
 .mini-classic { grid-template-rows:2fr 1fr 1fr; }
 .mini-classic i:first-child { width:20px; border-radius:50%; justify-self:center; background:#587d72; }
-.color-options { display:flex; justify-content:space-between; gap:5px; }
-.color-option { width:37px; height:37px; padding:5px; border:1px solid transparent; border-radius:50%; background:white; }
+.color-options { display:flex; flex-wrap:wrap; gap:8px; }
+.color-option { flex:0 0 44px; width:44px; height:44px; padding:5px; border:1px solid transparent; border-radius:50%; background:white; }
 .color-option span { display:block; width:100%; height:100%; border-radius:50%; background:var(--swatch); }
 .color-option[aria-pressed=true] { border-color:var(--ink); }
 .color-option[aria-pressed=true] span { box-shadow:inset 0 0 0 2px #fff; }
 .custom-color { display:flex; align-items:center; gap:10px; font-size:11px; font-weight:400; margin:14px 0 0; }
-.custom-color input[type=color] { width:28px; height:28px; padding:2px!important; border:1px solid var(--line); border-radius:5px; cursor:pointer; }
+.custom-color input[type=color] { width:44px; height:44px; padding:2px!important; border:1px solid var(--line); border-radius:5px; cursor:pointer; }
 .custom-color output { font-family:monospace; font-size:10px; color:var(--muted); }
 .custom-color>span { margin-right:auto; }
 .design-segment { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
@@ -122,8 +122,24 @@
 .portfolio-dialog .pf-footer { margin-inline:52px; }
 .portfolio-dialog .public-portfolio .pf-section { margin-top:0; }
 
+.design-controls > summary { display:flex; align-items:center; justify-content:space-between; gap:14px; cursor:pointer; list-style:none; }
+.design-controls > summary::-webkit-details-marker { display:none; }
+.design-controls > summary::after { content:'Mostrar opções'; color:var(--teal); font-size:12px; font-weight:600; white-space:nowrap; }
+.design-controls[open] > summary::after { content:'Ocultar opções'; }
+.design-controls > summary:focus-visible { outline:3px solid #087f8c55; outline-offset:4px; border-radius:4px; }
+.layout-option,.cover-options button,.design-segment button { font-size:12px; }
+.custom-color,.custom-color output,.design-bottom>span,.design-bottom button { font-size:12px; }
+.preview-bar,.preview-bar .text-button,.preview-explanation { font-size:12px; }
+.device-options button { min-height:44px; }
+.color-option { width:44px; height:44px; }
+.public-portfolio .pf-topline,.public-portfolio .pf-footer { font-size:11px; }
+.public-portfolio .pf-kicker { font-size:11px; }
+.public-portfolio .pf-location,.public-portfolio .pf-work-copy>span,.public-portfolio .pf-work-card details,.public-portfolio .pf-section-heading>span { font-size:12px; }
+.public-portfolio .pf-work-copy p,.public-portfolio .pf-section p,.public-portfolio .pf-skills li { font-size:13px; }
+.public-portfolio .pf-footer { font-size:11px; }
+
 @container (max-width:560px) {
-  .pf-topline { padding:19px 24px; font-size:9px; }
+  .pf-topline { padding:19px 24px; font-size:11px; }
   .pf-hero,.portfolio-dialog .public-portfolio .pf-hero { min-height:0; padding:30px 24px; gap:22px; flex-wrap:wrap; }
   .public-portfolio .pf-hero h2 { font-size:37px; }
   .pf-monogram { width:70px; height:84px; font-size:29px; box-shadow:5px 5px 0 #ffffff75; }
@@ -137,7 +153,7 @@
   .pf-foundations { gap:0; }
   .public-portfolio .pf-project { padding:24px; margin-bottom:24px; }
   .public-portfolio .pf-project h3 { font-size:25px; }
-  .pf-footer,.portfolio-dialog .pf-footer { margin-inline:24px; font-size:9px; flex-wrap:wrap; gap:8px; }
+  .pf-footer,.portfolio-dialog .pf-footer { margin-inline:24px; font-size:11px; flex-wrap:wrap; gap:8px; }
   .portfolio-dialog .pf-topline { padding-inline:24px; }
   .pf-studio .pf-hero { flex-direction:column; align-items:flex-start; }
   .pf-studio .pf-monogram { display:none; }
@@ -168,14 +184,14 @@
   .layout-mini { height:65px; }
   .layout-option,.cover-options button { font-size:12px; }
   .color-options { gap:14px; }
-  .color-option { width:40px; height:40px; }
+  .color-option { width:44px; height:44px; }
   .design-segment button { font-size:12px; }
   .design-bottom { display:block; }
   .preview-bar { padding:9px 12px; flex-wrap:wrap; }
   .preview-bar>span { display:none; }
   .device-options { display:none; }
   .preview-canvas { padding:12px; max-height:900px; }
-  .preview-explanation { padding:14px; font-size:10px; }
+  .preview-explanation { padding:14px; font-size:12px; }
   .portfolio-dialog .dialog-body { padding:8px; }
   .portfolio-dialog .dialog-header { padding:12px 15px; }
   .portfolio-dialog { max-width:calc(100vw - 16px); }

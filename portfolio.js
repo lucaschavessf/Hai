@@ -23,14 +23,13 @@ function portfolioTheme() {
 function portfolioControls() {
   const a = appearance();
   return `<section class="portfolio-designer" aria-label="Personalizar portfólio">
-    <aside class="design-controls">
-      <div class="design-intro"><h2>Personalize o portfólio</h2><p>Escolha a apresentação que combina com você.</p></div>
+    <details class="design-controls"><summary class="design-intro"><h2>Personalize o portfólio</h2><p>Escolha a apresentação que combina com você.</p></summary>
       <fieldset><legend>Design</legend><div class="layout-options">${Object.entries(portfolioLayouts).map(([id,label])=>`<button type="button" class="layout-option" data-appearance="layout" data-value="${id}" aria-pressed="${a.layout===id}"><span class="layout-mini mini-${id}" aria-hidden="true"><i></i><i></i><i></i></span><span>${label}</span></button>`).join('')}</div></fieldset>
       <fieldset><legend>Cor de destaque</legend><div class="color-options">${portfolioColors.map(([label,color])=>`<button type="button" class="color-option" style="--swatch:${color}" data-appearance="color" data-value="${color}" aria-label="${label}" aria-pressed="${a.color===color}"><span></span></button>`).join('')}</div><label class="custom-color" for="portfolio-color"><span>Outra cor</span><input id="portfolio-color" type="color" value="${a.color}"><output id="portfolio-hex">${a.color.toUpperCase()}</output></label></fieldset>
       <fieldset><legend>Tipografia</legend><div class="design-segment">${[['sans','Contemporânea'],['serif','Clássica']].map(([id,label])=>`<button type="button" data-appearance="font" data-value="${id}" aria-pressed="${a.font===id}"><span class="type-sample ${id}">Aa</span>${label}</button>`).join('')}</div></fieldset>
       <fieldset><legend>Capa</legend><div class="cover-options">${[['soft','Suave'],['lines','Linhas'],['plain','Lisa']].map(([id,label])=>`<button type="button" data-appearance="cover" data-value="${id}" aria-pressed="${a.cover===id}"><span class="cover-mini cover-${id}" aria-hidden="true"></span>${label}</button>`).join('')}</div></fieldset>
       <div class="design-bottom"><span role="status" id="design-save-status">Suas escolhas são salvas automaticamente.</span><button type="button" class="text-button" data-design-reset>Restaurar aparência</button></div>
-    </aside>
+    </details>
     <div class="design-preview"><div class="preview-bar"><span>Prévia pública</span><div class="device-options" aria-label="Tamanho da prévia"><button type="button" data-portfolio-device="desktop" aria-pressed="${portfolioDevice==='desktop'}">Desktop</button><button type="button" data-portfolio-device="mobile" aria-pressed="${portfolioDevice==='mobile'}">Celular</button></div><button type="button" class="text-button" data-action="preview">Ampliar</button></div><div class="preview-canvas"><div id="portfolio-live" class="portfolio-viewport ${portfolioDevice}">${publicPortfolio()}</div></div><p class="preview-explanation">A prévia mostra apenas as informações que você escolheu compartilhar.</p></div>
   </section>`;
 }

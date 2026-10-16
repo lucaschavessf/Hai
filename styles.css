@@ -112,6 +112,9 @@ a,button {
 }
 .brand {
   width:125px;
+  min-height:44px;
+  display:inline-flex;
+  align-items:center;
   flex:none;
 }
 .brand img {
@@ -146,11 +149,21 @@ nav a[aria-current] {
   gap:26px;
 }
 .environment {
+  display:inline-flex;
+  align-items:center;
+  min-height:44px;
   font-size:13px;
   white-space:nowrap;
 }
-.environment span {
+.environment .ui-icon {
   margin-left:9px;
+}
+.ui-icon {
+  display:inline-block;
+  width:18px;
+  height:18px;
+  flex:none;
+  vertical-align:-.22em;
 }
 .avatar {
   width:40px;
@@ -169,15 +182,6 @@ nav a[aria-current] {
   margin:auto;
   padding:40px 44px 80px;
   min-height:calc(100vh - 190px);
-}
-.home-intro {
-  display:flex;
-  justify-content:space-between;
-  font-size:14px;
-  margin-bottom:24px;
-}
-.home-intro span:last-child {
-  color:var(--muted);
 }
 .hero {
   display:grid;
@@ -361,6 +365,9 @@ nav a[aria-current] {
   margin-bottom:10px;
 }
 .section-title>a {
+  display:inline-flex;
+  align-items:center;
+  min-height:44px;
   font-size:13px;
   font-weight:600;
   color:var(--teal);
@@ -436,18 +443,34 @@ nav a[aria-current] {
   line-height:1.7;
   margin-bottom:24px;
 }
+.card-copy>p.card-deadline {
+  align-self:flex-start;
+  margin-top:-10px;
+  margin-bottom:18px;
+  padding:7px 10px;
+  border-radius:5px;
+  background:#edf5f2;
+  color:var(--dark);
+  font-size:12px;
+  line-height:1.4;
+}
+.card-deadline strong {
+  font-weight:700;
+}
 .card-link {
   margin-top:auto;
   border-top:1px solid var(--line);
-  padding-top:18px;
+  min-height:44px;
+  padding-top:10px;
   font-size:12px;
   font-weight:600;
   display:flex;
+  align-items:center;
   justify-content:space-between;
 }
-.card-link span {
-  font-size:19px;
-  font-weight:400;
+.card-link svg {
+  width:20px;
+  height:20px;
   color:var(--teal);
 }
 .page-heading {
@@ -522,7 +545,9 @@ nav a[aria-current] {
   background:transparent;
 }
 .back {
-  display:inline-block;
+  display:inline-flex;
+  align-items:center;
+  min-height:44px;
   font-size:13px;
   color:var(--muted);
   padding:5px 0;
@@ -683,22 +708,45 @@ nav a[aria-current] {
   margin-bottom:20px;
 }
 .workspace-steps {
-  display:flex;
-  gap:32px;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
   padding:19px 0;
   border-top:1px solid var(--line);
   border-bottom:1px solid var(--line);
   margin-bottom:30px;
   color:var(--teal);
-  font-size:12px;
+  font-size:13px;
 }
-.workspace-steps b {
-  font-weight:500;
-  margin-left:10px;
+.workspace-steps button {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+  min-height:48px;
+  padding:9px 12px;
+  border:1px solid transparent;
+  border-radius:8px;
+  background:transparent;
+  color:var(--teal);
+  text-align:left;
+  cursor:pointer;
+}
+.workspace-steps button>span {
+  flex:none;
+  font-variant-numeric:tabular-nums;
+  font-weight:650;
+}
+.workspace-steps button b {
+  font-weight:550;
   color:var(--muted);
 }
-.workspace-steps .complete b {
-  color:var(--teal);
+.workspace-steps button[aria-current="step"] {
+  border-color:#b8d9d2;
+  background:#eaf5f1;
+}
+.workspace-steps button[aria-current="step"] b {
+  color:var(--dark);
 }
 .facts>div {
   display:flex;
@@ -1121,6 +1169,7 @@ td strong {
   margin-bottom:25px;
 }
 .candidate-tabs a {
+  min-height:44px;
   padding:13px 20px;
   border:1px solid var(--line);
   border-radius:8px;
@@ -1130,6 +1179,9 @@ td strong {
 .candidate-tabs a[aria-current] {
   background:var(--dark);
   color:white;
+}
+.evaluation-jump {
+  display:none;
 }
 .answer-text {
   white-space:pre-wrap;
@@ -1150,7 +1202,8 @@ details {
 }
 summary {
   cursor:pointer;
-  padding:5px 0;
+  min-height:44px;
+  padding:12px 0;
 }
 details p {
   margin-top:15px;
@@ -1516,6 +1569,11 @@ dialog::backdrop {
   .two-column aside:has(#evaluation-form) {
     display:block;
   }
+  .evaluation-jump {
+    display:inline-flex;
+    align-items:center;
+    margin:-8px 0 16px;
+  }
   .page-heading {
     align-items:flex-start;
     flex-direction:column;
@@ -1542,6 +1600,9 @@ dialog::backdrop {
   }
   .company-columns {
     grid-template-columns:1fr;
+  }
+  .company-columns>.paper.mint {
+    order:-1;
   }
   .template-grid {
     grid-template-columns:repeat(2,1fr);
@@ -1593,8 +1654,8 @@ dialog::backdrop {
     max-width:none;
   }
   .avatar {
-    width:34px;
-    height:34px;
+    width:44px;
+    height:44px;
     font-size:10px;
   }
   nav {
@@ -1609,13 +1670,6 @@ dialog::backdrop {
   }
   .container {
     padding:24px 20px 50px;
-  }
-  .home-intro {
-    font-size:12px;
-    margin-bottom:20px;
-  }
-  .home-intro span:last-child {
-    font-size:11px;
   }
   .hero {
     display:flex;
@@ -1788,19 +1842,23 @@ dialog::backdrop {
     font-size:12px;
   }
   .workspace-steps {
-    gap:12px;
-    justify-content:space-between;
-    padding:16px 0;
-    font-size:10px;
+    gap:5px;
+    padding:12px 0;
+    font-size:12px;
   }
-  .workspace-steps span {
+  .workspace-steps button {
     display:flex;
     flex-direction:column;
-    gap:7px;
+    align-items:flex-start;
+    justify-content:center;
+    gap:5px;
+    padding:8px 6px;
+    min-height:58px;
   }
-  .workspace-steps b {
+  .workspace-steps button b {
     margin-left:0;
-    font-size:10px;
+    font-size:11px;
+    line-height:1.25;
   }
   .facts>div {
     gap:12px;
@@ -1973,7 +2031,7 @@ dialog::backdrop {
     line-height:1.6;
   }
   footer a:last-child {
-    font-size:10px;
+    font-size:12px;
   }
   .dialog-header {
     padding:15px 20px;
@@ -2037,9 +2095,6 @@ dialog::backdrop {
   }
   .account {
     gap:10px;
-  }
-  .home-intro span:last-child {
-    display:none;
   }
   .page-heading h1 {
     font-size:32px;

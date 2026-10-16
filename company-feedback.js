@@ -36,7 +36,7 @@ function companyProfileScreen() {
   const list = experiences.filter(x => x.brand === name);
   const image = list[0]?.image || 'assets/hero.jpg';
   return `<a class="back" href="#${rh() ? 'empresa' : 'explorar'}">← ${rh() ? 'Visão geral' : 'Explorar experiências'}</a>
-    <section class="company-profile-hero"><div><p class="eyebrow">PERFIL DA EMPRESA</p><h1>${esc(name)}</h1><p class="lead">${esc(profile.tagline)}</p><div class="company-profile-actions">${name === 'Nexa' && rh() ? '<button type="button" class="btn light" data-action="edit-company-profile">Editar perfil</button>' : `<a class="btn light" href="#desafio/${list[0].id}">Começar desafio</a>`}</div></div><img src="${image}" alt=""></section>
+    <section class="company-profile-hero"><div><p class="eyebrow">PERFIL DA EMPRESA</p><h1>${esc(name)}</h1><p class="lead">${esc(profile.tagline)}</p><div class="company-profile-actions">${name === 'Nexa' && rh() ? '<button type="button" class="btn light" data-action="edit-company-profile">Editar perfil</button>' : `<a class="btn light" href="#experiencia/${list[0].id}">Ver desafio</a>`}</div></div><img src="${image}" alt=""></section>
     <div class="company-profile-grid"><section class="paper"><p class="eyebrow">NOSSO TRABALHO</p><h2>O que fazemos</h2><p>${esc(profile.work)}</p></section><section class="paper mint"><p class="eyebrow">NOSSA EQUIPE</p><h2>Como trabalhamos</h2><p>${esc(profile.culture)}</p><div class="company-values">${profile.values.split(',').map(v => `<span>${esc(v.trim())}</span>`).join('')}</div></section></div>
     <section class="section company-open-challenges"><div class="section-title"><div><p class="eyebrow">EXPERIÊNCIAS DISPONÍVEIS</p><h2>Desafios abertos</h2></div><span class="small">${list.length} ${list.length === 1 ? 'desafio' : 'desafios'}</span></div><div class="card-grid">${list.map(card).join('')}</div></section>`;
 }
@@ -74,15 +74,15 @@ const feedbackSignals = {
 
 function estimateFeedback(x, d) {
   const answer = String(d.response || '').trim();
-  if (!answer) return { unscored: true, reason: d.file ? 'A entrega foi feita em arquivo. Esta análise local não lê anexos; a equipe poderá avaliar o conteúdo.' : 'Escreva uma resposta para receber uma análise estimada.' };
+  if (!answer) return { unscored: true, reason: d.file ? 'A entrega foi feita em arquivo. Esta análise automática não lê anexos e não gera uma nota estimada para este formato.' : 'Escreva uma resposta para receber uma análise estimada.' };
   const signals = feedbackSignals[x.id];
-  if (!signals) return { unscored: true, reason: 'Este briefing ainda não tem regras de análise configuradas. Use os critérios apresentados para revisar sua resposta.' };
+  if (!signals) return { unscored: true, reason: 'Este briefing ainda não tem regras de análise automática. Use os critérios apresentados para revisar sua resposta.' };
   const rows = x.criteria.map((criterion, index) => {
     const checks = signals[index] || [];
     const found = checks.filter(([, pattern]) => pattern.test(answer)).map(([label]) => label);
     const missing = checks.filter(([, pattern]) => !pattern.test(answer)).map(([label]) => label);
     const lengthCredit = answer.length >= 160 ? 1 : 0;
-    // Full marks require a person to judge whether the reasoning is actually sound.
+    // The automated estimate stays conservative and does not certify the decision.
     const score = found.length ? Math.min(4, 1 + found.length + lengthCredit) : 0;
     return { name: criterion[0], score, found, missing };
   });
@@ -92,7 +92,7 @@ function estimateFeedback(x, d) {
 function feedbackPanel(x, d) {
   const f = d.estimatedFeedback;
   if (!d.submitted) return '';
-  if (!f) return `<section class="paper feedback-panel"><p class="eyebrow">REVISÃO DA ENTREGA</p><h2>Analise sua resposta</h2><p>Receba uma estimativa por critério e sugestões para uma nova tentativa.</p><button type="button" class="btn secondary" data-action="refresh-feedback">Analisar resposta</button></section>`;
-  if (f.unscored) return `<section class="paper feedback-panel"><p class="eyebrow">ANÁLISE AUTOMÁTICA</p><h2>Sem nota estimada</h2><p>${esc(f.reason)}</p></section>`;
-  return `<section class="paper feedback-panel" aria-label="Análise automática da entrega"><div class="section-title"><div><p class="eyebrow">ANÁLISE AUTOMÁTICA</p><h2>Feedback da sua entrega</h2></div><div class="feedback-total"><strong>${f.total}/${f.max}</strong><span>pontos estimados</span></div></div><p class="small">Estimativa por sinais presentes na última resposta enviada, não uma avaliação humana. A análise por texto não atribui 5/5, pois uma pessoa precisa julgar a qualidade da decisão.</p>${f.response !== String(d.response || '').trim() ? '<p class="feedback-pending">Você alterou o rascunho. Envie a atualização para recalcular a estimativa.</p>' : ''}<div class="feedback-criteria">${f.rows.map(row => `<article><div><h3>${esc(row.name)}</h3><strong>${row.score}/5</strong></div><p><b>Identificado:</b> ${esc(row.found.length ? row.found.join(', ') : 'nenhum sinal específico deste critério')}.</p><p><b>Revise:</b> ${esc(row.missing.length ? row.missing.join(', ') : 'explique melhor como os dados sustentam sua escolha')}.</p></article>`).join('')}</div><p class="feedback-next">Você pode atualizar a entrega para ver uma nova estimativa. A análise anterior será substituída.</p></section>`;
+  if (!f) return `<section id="feedback-analysis" class="paper feedback-panel"><p class="eyebrow">ANÁLISE AUTOMÁTICA</p><h2>Analise sua resposta</h2><p>Veja uma estimativa por critério e sugestões para revisar sua entrega.</p><button type="button" class="btn secondary" data-action="refresh-feedback">Analisar resposta</button></section>`;
+  if (f.unscored) return `<section id="feedback-analysis" class="paper feedback-panel"><p class="eyebrow">ANÁLISE AUTOMÁTICA</p><h2>Sem nota estimada</h2><p>${esc(f.reason)}</p></section>`;
+  return `<section id="feedback-analysis" class="paper feedback-panel" aria-label="Análise automática da entrega"><div class="section-title"><div><p class="eyebrow">ANÁLISE AUTOMÁTICA</p><h2>Análise da sua entrega</h2></div><div class="feedback-total"><strong>${f.total}/${f.max}</strong><span>pontos estimados</span></div></div><p class="small">Estimativa calculada a partir de sinais na sua última resposta escrita. Ela não confirma se a decisão está correta e não analisa anexos.</p>${f.response !== String(d.response || '').trim() ? '<p class="feedback-pending">Você alterou o rascunho. Envie a atualização para recalcular a estimativa.</p>' : ''}<div class="feedback-criteria">${f.rows.map(row => `<article><div><h3>${esc(row.name)}</h3><strong>${row.score}/5</strong></div><p><b>Identificado:</b> ${esc(row.found.length ? row.found.join(', ') : 'nenhum sinal específico deste critério')}.</p><p><b>Revise:</b> ${esc(row.missing.length ? row.missing.join(', ') : 'explique melhor como os dados sustentam sua escolha')}.</p></article>`).join('')}</div><p class="feedback-next">Envie uma nova versão para atualizar a análise.</p></section>`;
 }
