@@ -40,16 +40,15 @@ O painel do RH usa uma base própria de exemplos e avaliações humanas; as entr
 
 - Paleta Hai preservada: `#087F8C`, `#064B55`, `#DFF3EF`, `#FFE8DD`, branco e `#F7FAF9`.
 - Logo original em `Hai_Logo_Vetorizada.svg`.
-- Fotografias locais em `assets/`; fontes documentadas em `assets/README.md`.
-- `data.js`: experiências, candidatos e templates.
-- `app.js`: rotas, interfaces e estado da sessão.
-- `styles.css`: layout responsivo, estados de foco e redução de movimento.
-- `portfolio.js` e `portfolio.css`: editor de aparência e prévia pública responsiva.
-- `project.js` e `project.css`: projeto complementar único, edição e apresentação no portfólio e nas avaliações de exemplo.
-- `institutional.js` e `institutional.css`: páginas Sobre, Privacidade e Ajuda, além do rodapé.
-- `features.js` e `features.css`: editor Markdown, formulário de perguntas, contador opcional, níveis de competência e conversa com o colega de equipe.
-- `company-feedback.js` e `company-feedback.css`: perfil das empresas, edição da Nexa e feedback estimado por critério.
+- Fotografias em `assets/`; materiais de experiência em `materiais/`, com fontes documentadas em `assets/README.md`.
+- `src/core/`: inicialização da aplicação, rotas, estado, dados e estilos compartilhados.
+- `src/features/`: desafios, criação de experiências e componentes de interação.
+- `src/company/`: perfis de empresas e feedback estimado.
+- `src/institutional/`: páginas Sobre, Privacidade e Ajuda, além do rodapé.
+- `src/portfolio/`: editor de aparência e prévia pública responsiva.
+- `src/project/`: projeto complementar, edição e apresentação no portfólio e nas avaliações.
 - `materiais/`: 12 anexos de exemplo em UTF-8, com BOM para facilitar abertura dos CSVs no Excel.
+- `tools/`: verificações automatizadas e captura de telas.
 
 ## Verificação
 

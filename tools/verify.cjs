@@ -120,7 +120,7 @@ const vm = require('node:vm');
 
     // Real material downloads, not placeholder controls.
     const source = {};
-    vm.runInNewContext(fs.readFileSync('data.js','utf8')+'; capture(templates)', {capture:v=>source.templates=v});
+    vm.runInNewContext(fs.readFileSync('src/core/data.js','utf8')+'; capture(templates)', {capture:v=>source.templates=v});
     let materialChecks = 0;
     for (const t of source.templates) for (const m of t.resources) {
       assert.equal(fs.readFileSync(path.join('materiais',m.file),'utf8'), '\ufeff'+m.content);

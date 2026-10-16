@@ -1,3 +1,9 @@
 tmp/
 node_modules/
 test-results/
+
+# Local agent skills and generated Impeccable reports
+.agents/
+.impeccable/
+skills-lock.json
+PLANO_CORRECOES_HAI.md
